@@ -1,6 +1,7 @@
 from random import randint, choice
+from search import *
 
-class RubiksCube:
+class RubiksCube(Problem):
     """
     Class containing the rubiks cube code
     """
@@ -9,8 +10,10 @@ class RubiksCube:
         self,
         n = 3,
         colours = ['w', 'o', 'g', 'r', 'b', 'y'],
-        state = None
+        state = None,
+        initial = "rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
     ):
+        super().__init__(initial)
         """
         Input: n - integer representing the width and height of the rubiks cube
                colours - list containing the first letter of ever colour you wish to use (Default = ['w', 'o', 'g', 'r', 'b', 'y']) [OPTIONAL]
@@ -33,6 +36,46 @@ class RubiksCube:
                     self.cube[-1].append([])
                 elif len(self.cube[-1][-1]) == self.n and len(self.cube[-1]) == self.n and i < len(state) - 1:
                     self.cube.append([[]])
+
+    def actions(self, state):
+        """Return the legal moves for the Rubik's Cube in the given state."""
+        possible_actions = []
+
+        for row in range(self.n):
+            possible_actions.append(f'horizontal_{row}_0')
+            possible_actions.append(f'horizontal_{row}_1')
+
+        for col in range(self.n):
+            possible_actions.append(f'vertical_{col}_0')
+            possible_actions.append(f'vertical_{col}_1')
+
+        for col in range(self.n):
+            possible_actions.append(f'side_{col}_0')
+            possible_actions.append(f'side_{col}_1')
+
+        return possible_actions
+
+    def result(self, state, action):
+        # parsing action into twist, index, and direction
+        twist, index, direction = action.split('_')
+        index, direction = int(index), int(direction)
+
+        if twist == "horizontal":
+            self.horizontal_twist(index, direction)
+        elif twist == "vertical":
+            self.horizontal_twist(index, direction)
+        elif twist == "side":
+            self.horizontal_twist(index, direction)
+
+        return self.stringify()
+
+    def goal_test(self):
+        self.solved()
+
+    def value(self, state):
+        """For optimization problems, each state has a value. Hill Climbing
+        and related algorithms try to maximize this value."""
+        raise NotImplementedError
 
     def reset(self):
         """

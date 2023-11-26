@@ -9,7 +9,10 @@ NEW_HEURISTICS = False
 HEURISTIC_FILE = 'heuristic.json'
 
 #--------------------------------
-cube = RubiksCube(n=3)
+# cube = RubiksCube(n=3)
+cube = RubiksCube(
+    state="rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
+)
 cube.show()
 print('-----------')
 #--------------------------------
