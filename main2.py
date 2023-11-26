@@ -3,7 +3,7 @@ from search import *
 
 def print_cubes(cubes):
     for i in cubes:
-        RubiksCube(initial=i).show()
+        RubiksCube(state=i).show()
         print('-------------------------------------------------------')
 
 if __name__ == '__main__':
@@ -11,4 +11,5 @@ if __name__ == '__main__':
     cube.show()
     print(cube.stringify())
     solution = simulated_annealing_full(problem=cube)
-    print_cubes(solution)
+    print(solution)
+    # print_cubes(solution)

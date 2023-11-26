@@ -11,7 +11,7 @@ class RubiksCube(Problem):
         n = 3,
         colours = ['w', 'o', 'g', 'r', 'b', 'y'],
         state = None,
-        initial = ""
+        initial = "rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
     ):
         super().__init__(initial)
         """
@@ -21,6 +21,7 @@ class RubiksCube(Problem):
         Description: Initialize the rubiks cube
         Output: None
         """
+
         if state is None:
             self.n = n
             self.colours = colours
@@ -86,13 +87,48 @@ class RubiksCube(Problem):
         # split state1 and state2 into sides
         # top_1, left_1, center_1, right_1, back_1, bottom_1 = [(state1[i:i+5]) for i in range(0, len(state1), 5)]
         top_2, left_2, center_2, right_2, back_2, bottom_2 = [(state2[i:i+9]) for i in range(0, len(state2), 9)]
-        cost = self.num_of_unique_char(top_2) + self.num_of_unique_char(left_2) + self.num_of_unique_char(center_2) + self.num_of_unique_char(right_2) + self.num_of_unique_char(back_2) + self.num_of_unique_char(bottom_2)
+
+        cost = (self.num_of_unique_char(top_2) + 
+                self.num_of_unique_char(left_2) + 
+                self.num_of_unique_char(center_2) + 
+                self.num_of_unique_char(right_2) + 
+                self.num_of_unique_char(back_2) + 
+                self.num_of_unique_char(bottom_2))
+        
         return cost
 
     def value(self, state):
         """For optimization problems, each state has a value. Hill Climbing
         and related algorithms try to maximize this value."""
-        return 1
+
+        # find num of correct colors of each side, return sum
+        # correct colors are based off of center colors
+
+        center_colors = {
+            "top_color": state[4],
+            "left_color": state[13],
+            "center_color": state[22],
+            "right_color": state[31],
+            "back_color": state[40],
+            "bottom_color": state[49]
+        }
+
+        sum = 0
+
+        top, left, center, right, back, bottom = [(state[i:i+9]) for i in range(0, len(state), 9)]
+
+        sum = (self.find_most_common_color(top, center_colors['top_color']) +
+               self.find_most_common_color(left, center_colors['left_color']) +
+               self.find_most_common_color(center, center_colors['center_color']) +
+               self.find_most_common_color(right, center_colors['right_color']) +
+               self.find_most_common_color(back, center_colors['back_color']) +
+               self.find_most_common_color(bottom, center_colors['bottom_color']))
+        
+        print(sum)
+        return sum
+    
+    def find_most_common_color(self, side, center_color):
+        return side.count(center_color)
 
     def num_of_unique_char(self, str):
         s = set(str)
