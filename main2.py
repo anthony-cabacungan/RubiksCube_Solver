@@ -1,20 +1,14 @@
 from cube import RubiksCube
-from solver2 import *
+from search import *
 
-#--------------------------------
-cube = RubiksCube(
-    state="rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
-)
-cube.show()
-print('-----------')
-#--------------------------------
-cube.horizontal_twist(row=0,direction=0)
-cube.show()
-print(cube.stringify())
-
-# ------------------------------------------------------------------------------------
+def print_cubes(cubes):
+    for i in cubes:
+        RubiksCube(initial=i).show()
+        print('-------------------------------------------------------')
 
 if __name__ == '__main__':
-    wgc = WolfGoatCabbage()
-    solution = depth_first_graph_search(wgc).solution()
-    print(solution)
+    cube = RubiksCube(state="rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo")
+    cube.show()
+    print(cube.stringify())
+    solution = simulated_annealing_full(problem=cube)
+    print_cubes(solution)

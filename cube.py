@@ -11,7 +11,7 @@ class RubiksCube(Problem):
         n = 3,
         colours = ['w', 'o', 'g', 'r', 'b', 'y'],
         state = None,
-        initial = "rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
+        initial = ""
     ):
         super().__init__(initial)
         """
@@ -60,22 +60,43 @@ class RubiksCube(Problem):
         twist, index, direction = action.split('_')
         index, direction = int(index), int(direction)
 
-        if twist == "horizontal":
-            self.horizontal_twist(index, direction)
-        elif twist == "vertical":
-            self.horizontal_twist(index, direction)
-        elif twist == "side":
-            self.horizontal_twist(index, direction)
+        # create temp cube
+        temp_cube = RubiksCube(state=state)
 
-        return self.stringify()
+        if twist == "horizontal":
+            temp_cube.horizontal_twist(index, direction)
+        elif twist == "vertical":
+            temp_cube.vertical_twist(index, direction)
+        elif twist == "side":
+            temp_cube.side_twist(index, direction)
+
+        return temp_cube.stringify()
 
     def goal_test(self):
         self.solved()
+    
+    def path_cost(self, c, state1, action, state2):
+        """Return the cost of a solution path that arrives at state2 from
+        state1 via action, assuming cost c to get up to state1. If the problem
+        is such that the path doesn't matter, this function will only look at
+        state2. If the path does matter, it will consider c and maybe state1
+        and action. The default method costs 1 for every step in the path."""
+        # calculate path cost by counting num of different colors of each side
+        
+        # split state1 and state2 into sides
+        # top_1, left_1, center_1, right_1, back_1, bottom_1 = [(state1[i:i+5]) for i in range(0, len(state1), 5)]
+        top_2, left_2, center_2, right_2, back_2, bottom_2 = [(state2[i:i+9]) for i in range(0, len(state2), 9)]
+        cost = self.num_of_unique_char(top_2) + self.num_of_unique_char(left_2) + self.num_of_unique_char(center_2) + self.num_of_unique_char(right_2) + self.num_of_unique_char(back_2) + self.num_of_unique_char(bottom_2)
+        return cost
 
     def value(self, state):
         """For optimization problems, each state has a value. Hill Climbing
         and related algorithms try to maximize this value."""
-        raise NotImplementedError
+        return 1
+
+    def num_of_unique_char(self, str):
+        s = set(str)
+        return len(s)
 
     def reset(self):
         """
