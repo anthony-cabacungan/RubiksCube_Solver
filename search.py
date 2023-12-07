@@ -100,6 +100,7 @@ class Node:
         """[Figure 3.10]"""
         next_state = problem.result(self.state, action)
         next_node = Node(next_state, self, action, problem.path_cost(self.path_cost, self.state, action, next_state))
+        # print(next_node)
         return next_node
 
     def solution(self):
@@ -683,6 +684,7 @@ def simulated_annealing_full(problem, schedule=exp_schedule()):
         if T == 0:
             return states
         neighbors = current.expand(problem)
+        # print(neighbors)
         if not neighbors:
             return current.state
         next_choice = random.choice(neighbors)

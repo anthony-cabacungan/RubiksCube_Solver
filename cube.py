@@ -8,12 +8,42 @@ class RubiksCube(Problem):
 
     def __init__(
         self,
-        n = 3,
-        colours = ['w', 'o', 'g', 'r', 'b', 'y'],
-        state = None,
-        initial = "rrrwrwrgryrywwwwrwbrbggggggwowyyyyyygygbbbbbbooobooooo"
+        initial,
+        n=3,
+        colours=['w', 'o', 'g', 'r', 'b', 'y'],
+        state=None,
+        goal=["rrrrrrrrrwwwwwwwwwgggggggggyyyyyyyyybbbbbbbbbooooooooo",
+              "rrrrrrrrrgggggggggyyyyyyyyybbbbbbbbbwwwwwwwwwooooooooo",
+              "rrrrrrrrryyyyyyyyybbbbbbbbbwwwwwwwwwgggggggggooooooooo",
+              "rrrrrrrrrbbbbbbbbbwwwwwwwwwgggggggggyyyyyyyyyooooooooo",
+              
+              "ooooooooobbbbbbbbbyyyyyyyyygggggggggwwwwwwwwwrrrrrrrrr",
+              "oooooooooyyyyyyyyygggggggggwwwwwwwwwbbbbbbbbbrrrrrrrrr",
+              "ooooooooogggggggggwwwwwwwwwbbbbbbbbbyyyyyyyyyrrrrrrrrr",
+              "ooooooooowwwwwwwwwbbbbbbbbbyyyyyyyyygggggggggrrrrrrrrr",
+              
+              "yyyyyyyyygggggggggooooooooobbbbbbbbbrrrrrrrrrwwwwwwwww",
+              "yyyyyyyyyooooooooobbbbbbbbbrrrrrrrrrgggggggggwwwwwwwww",
+              "yyyyyyyyybbbbbbbbbrrrrrrrrrgggggggggooooooooowwwwwwwww",
+              "yyyyyyyyyrrrrrrrrrgggggggggooooooooobbbbbbbbbwwwwwwwww",
+              
+              "gggggggggoooooooooyyyyyyyyyrrrrrrrrrwwwwwwwwwbbbbbbbbb",
+              "gggggggggyyyyyyyyyrrrrrrrrrwwwwwwwwwooooooooobbbbbbbbb",
+              "gggggggggrrrrrrrrrwwwwwwwwwoooooooooyyyyyyyyybbbbbbbbb",
+              "gggggggggwwwwwwwwwoooooooooyyyyyyyyyrrrrrrrrrbbbbbbbbb",
+
+              "wwwwwwwwwbbbbbbbbbooooooooogggggggggrrrrrrrrryyyyyyyyy",
+              "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy",
+              "wwwwwwwwwgggggggggrrrrrrrrrbbbbbbbbboooooooooyyyyyyyyy",
+              "wwwwwwwwwrrrrrrrrrbbbbbbbbbooooooooogggggggggyyyyyyyyy",
+              
+              "bbbbbbbbbyyyyyyyyyooooooooowwwwwwwwwrrrrrrrrrggggggggg",
+              "bbbbbbbbbooooooooowwwwwwwwwrrrrrrrrryyyyyyyyyggggggggg",
+              "bbbbbbbbbwwwwwwwwwrrrrrrrrryyyyyyyyyoooooooooggggggggg",
+              "bbbbbbbbbrrrrrrrrryyyyyyyyyooooooooowwwwwwwwwggggggggg"
+              ]
     ):
-        super().__init__(initial)
+        super().__init__(initial, goal)
         """
         Input: n - integer representing the width and height of the rubiks cube
                colours - list containing the first letter of ever colour you wish to use (Default = ['w', 'o', 'g', 'r', 'b', 'y']) [OPTIONAL]
@@ -53,49 +83,58 @@ class RubiksCube(Problem):
         for col in range(self.n):
             possible_actions.append(f'side_{col}_0')
             possible_actions.append(f'side_{col}_1')
-
+        
         return possible_actions
-
+    
     def result(self, state, action):
+        """Return the state that results from executing the given
+        action in the given state. The action must be one of
+        self.actions(state)."""
         # parsing action into twist, index, and direction
         twist, index, direction = action.split('_')
         index, direction = int(index), int(direction)
-
         # create temp cube
-        temp_cube = RubiksCube(state=state)
+        temp_cube = RubiksCube(state=state, initial=state)
 
         if twist == "horizontal":
-            temp_cube.horizontal_twist(index, direction)
+            temp_cube.horizontal_twist(row=index, direction=direction)
         elif twist == "vertical":
-            temp_cube.vertical_twist(index, direction)
+            temp_cube.vertical_twist(column=index, direction=direction)
         elif twist == "side":
-            temp_cube.side_twist(index, direction)
-
+            temp_cube.side_twist(column=index, direction=direction)
+            
         return temp_cube.stringify()
 
     def goal_test(self):
-        self.solved()
+        """Return True if the state is a goal. The default method compares the
+        state to self.goal or checks for state in self.goal if it is a
+        list, as specified in the constructor. Override this method if
+        checking against a single self.goal is not enough."""
+        return self.solved()
     
+    def manhattan_distance(self, state):
+        """Calculate the Manhattan distance between the current state and a list of goal states."""
+        min_distance = float('inf')  # Initialize with positive infinity
+        
+        for goal_state in self.goal:
+            distance = 0
+            for i in range(len(state)):
+                if state[i] != ' ' and state[i] != goal_state[i]:
+                    # Assuming each move has a cost of 1
+                    distance += 1
+
+            min_distance = min(min_distance, distance)
+
+        return min_distance
+
     def path_cost(self, c, state1, action, state2):
         """Return the cost of a solution path that arrives at state2 from
-        state1 via action, assuming cost c to get up to state1. If the problem
-        is such that the path doesn't matter, this function will only look at
-        state2. If the path does matter, it will consider c and maybe state1
-        and action. The default method costs 1 for every step in the path."""
-        # calculate path cost by counting num of different colors of each side
+        state1 via action, assuming cost c to get up to state1."""
         
-        # split state1 and state2 into sides
-        # top_1, left_1, center_1, right_1, back_1, bottom_1 = [(state1[i:i+5]) for i in range(0, len(state1), 5)]
-        top_2, left_2, center_2, right_2, back_2, bottom_2 = [(state2[i:i+9]) for i in range(0, len(state2), 9)]
-
-        cost = (self.num_of_unique_char(top_2) + 
-                self.num_of_unique_char(left_2) + 
-                self.num_of_unique_char(center_2) + 
-                self.num_of_unique_char(right_2) + 
-                self.num_of_unique_char(back_2) + 
-                self.num_of_unique_char(bottom_2))
-        
-        return cost
+        # Calculate the minimum Manhattan distance as the cost
+        distance = self.manhattan_distance(state2)
+        # print(distance)
+        return distance
 
     def value(self, state):
         """For optimization problems, each state has a value. Hill Climbing
@@ -123,8 +162,8 @@ class RubiksCube(Problem):
                self.find_most_common_color(right, center_colors['right_color']) +
                self.find_most_common_color(back, center_colors['back_color']) +
                self.find_most_common_color(bottom, center_colors['bottom_color']))
-        
-        print(sum)
+        # print(sum)
+        print(state, sum)
         return sum
     
     def find_most_common_color(self, side, center_color):
