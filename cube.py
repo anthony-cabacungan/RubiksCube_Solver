@@ -123,7 +123,7 @@ class RubiksCube(Problem):
                     # Assuming each move has a cost of 1
                     distance += 1
 
-            min_distance = min(min_distance, distance)
+            min_distance = max(min_distance, distance)
 
         return min_distance
 
